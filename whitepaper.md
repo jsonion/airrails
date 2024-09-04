@@ -24,7 +24,13 @@ JSON.stringify(collection.streakData);
 // see key order changed for no obvious reason
 ```
 
-The truest of reasons for this strange pattern is, under the hood, that this was so built for in-browser memory access optimization, due to transform static string paths, the hard-coded `object.key` references. Hash table indexing is employed for the optimization, which stores shorter, static pointers to stored properties (linking in memory addresses in applying data state to code blocks, at consumers).
+The truest of reasons for this strange key disorder pattern is, under the hood, that this was so built for in-browser memory access optimization, due to transform static string paths, the hard-coded `object.key` references. No matter how big the index its access times are equal for either path in one `Object`.
+
+Hash table indexing is employed for the optimization, which stores shorter, static pointers to stored properties (linking in memory addresses in applying data state to code blocks, at consumers).
+
+There's one thing about the `Object` that wants to get discovered and I haven't yet made the realization; whether dynamic string keys receive the same treatment, in bracket notation, in executing code blocks, fresh or refreshed (at any code repetition, optimized or first-time). 
+
+So here's example of a similar object on front-end, it creates deep object paths based on characters in words (well atleast there's not much use for flat Arrays or Objects unless there's an index API):
 
 ```javascript
 /*/////
