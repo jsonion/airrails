@@ -98,7 +98,7 @@ Well so what, right? Were there static schema objects to allow for public checks
 
 /*/////
    demonstration of problem at parsing point
- … there's this lil way to tap inbound stream
+ … there's this lil way to tap inbound stream:
 
    https://developer.mozilla.org/en-US/docs/Web/API/Response/body
                                           */////
@@ -120,9 +120,11 @@ JSON.stringify(curUser);
 // … and we couldn't even get a key-order array
 ```
 
-With this example the problem does become apparent, but only for as long as there is actual need for checksum validation and schema-ordered output. And with current API order on most websites this doesn't even come close to an issue. Perhaps the mix on `trickaweek.com`, used as example here in the context of `jsonion`, might give some insight!
+With this example the problem does become apparent, but only for as long as there is actual need for checksum validation and schema-ordered output. And with current `API` services found at most `HTTP/S` website domains this doesn't even come close to an issue. 
 
-It so occurs that document nodes on inbound web traffic in browser are usually parsed using `JSON.parse` and `response.json()`, and are thus immediately invoked and stored in `JSObject`; the `Object` is soon to apply its indexing on named collections and offset the intended rigid schema before any code could intercept it to parse out its schema in array. Oh well, atleast for the limited reason of checksum validation per document node, it then really makes sense to use a schema, defined in-array (or otherwise one given `keys` order won't keep its shape at checksum). Just think about it!
+Perhaps the mix on `trickaweek.com`, used as example here in the context of `jsonion`, might give us some more insight -- it's about a set of coding stages, coding problems placed with neatly packed context; there thinking `Object` and `Array` schemas is good practice anyway.
+
+It so occurs that document nodes on inbound web traffic in browser are usually parsed using `JSON.parse()` and `response.json()`, and are thus immediately invoked stored in `JSObject`; the `Object` is soon to apply its indexing on named collections and offset the intended rigid schema before any code could intercept it to parse out its schema in array. Oh well, atleast for the limited reason of checksum validation per document node, it then really makes sense to use a schema, defined in-array (or otherwise one given `keys` order won't keep its shape at checksum). Just think about it!
 
 The truest of reasons for this strange key disorder pattern is, under the hood, that this was so built for in-browser memory access optimization, due to transform static string paths, the hard-coded `object.key` references. No matter how big the index its access times are equal for either path in one `Object`.
 
