@@ -8,32 +8,140 @@ Lets start by making a simple claim, that JS object notation is trivial to use w
 Well so what, right? Were there static schema objects to allow for public checksum validation of document nodes, as received from one remote DB[collection], or found in local persistent storage, and at that with simplistic syntax that JS is known for? Well aren't web developers the chattery types!
 
 ```javascript trickaweek.com
-JSON.parse(`[{
-  userId: 1234, displayName: "blaz_skate", 
-                 streakData: [{ weekIdx: 36,
-                                weekIdx: 35,
-                                weekIdx: 34 }]
-}]`);   /////   streaks aren't limited to sk8!
+/*/////
+   lil front-end database caching logic starter
+                                          */////
+(bfr=window.localStorage
+  && window.localStorage.getItem("streaks"));
 
-JSON.stringify(collection.streakData);
+ DB.Streaks = (bfr)                   &&
+              (bfr = JSON.parse(bfr)) && 
+                      inArrType(bfr);
+   /////     becomes executable array
+ 
+ switch (DB.Streaks) {
+  case  true:
+   if   (DB.Streaks.invalidateCache < Date.now()
+                                   .getSeconds())
+        {localStorage.removeItem("streaks"); 
+         break}
+/*/////
+   in other case a collection need be fetched
+                                          */////
+  case  false:
+   if   (bfr = await getStreaks())
+        {
+         let invalidateCache 
+          =  Date.now().getSeconds();
+
+         DB.Streaks
+          = inArrType(bfr, {invalidateCache});
+
+         localStorage.setItem("streaks", 
+                 JSON.stringify( bfr ));
+        }
+  }
+
+    //
+   //  notice JSON methods are the 1st and only
+  // … to touch JSObjects (key order isn't in) 
+
+  async function getStreaks () {
+    let res = await fetchAPI("streaks", "/now");
+    return res;
+  }
+
+  function fetchAPI (route, urlMix,
+                           postData=null) {
+   const apiRoot 
+     =   process && process.ENV.apiRoot
+                 ||      window.apiRoot;
+                /// ENV variable
+   const routes
+     = {
+       auth: "/auth",
+      users: "/users",
+    streaks: "/streaks",
+    };    ///  service-specific API endpoints
+
+   const CFG = () => new Object({
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "GET",
+        mode: "cors",
+        cache: "no-cache", 
+        redirect: "follow",
+        referrerPolicy: "no-referrer",
+   }),
+   GET=CFG(),
+   POST=Object.assign(CFG(), {method:"POST"}),
+   PATCH=Object.assign(CFG(), {method:"PATCH"}),
+   DELETE=Object.assign(CFG(), {method:"DELETE"});
+
+   try {
+   var res = await fetch(
+             apiRoot + routes[route] + urlMix, 
+            (postData === null) 
+             ?  GET
+             :  Object.assign(POST, {
+                  body: JSON.stringify(postData)
+           }));
+  } catch (ee) {
+    throw (ee);
+  }
+                          ////
+  if (res) return res.body &&
+                  res.json();
+      else return undefined;
+}
+
+/*/////
+   demonstration of problem at parsing point
+ … there's this lil way to tap inbound stream
+
+   https://developer.mozilla.org/en-US/docs/Web/API/Response/body
+                                          */////
+
+const curUser = JSON.parse(`[{
+"userId": "1234", "displayName": "blaz_skate", 
+                   'streakData": [
+                                 {"weekIdx":36},
+                                 {"weekIdx":35},
+                                 {"weekIdx":34} 
+                                 }]
+}]`); ///// here streaks aren't limited to sk8!
+
+JSON.stringify(curUser);
 
 [{"displayName":"blaz_skate","streakData":["{...}"],"userId":"1234"}]
 
 // see key order changed for no obvious reason
+// … and I couldn't even get a key-order array
 ```
+
+With this example the problem does become apparent, but only for as long as there is actual need for checksum validation and schema-ordered output. And with current API order on most websites this doesn't even come close to an issue. Perhaps the mix on `trickaweek.com`, used as example here in the context of `jsonion`, might give some insight!
+
+It so occurs that document nodes on inbound web traffic in browser are usually parsed using `JSON.parse` and `response.json()`, and are thus immediately invoked and stored in JSObject; the Object is soon to apply its indexing on named collections and offset the intended rigid schema before any code could intercept it to parse out its schema in array. Oh well, atleast for the limited reason of checksum validation per document node, it then really makes sense to use a schema, defined in-array (or otherwise one given `keys` order won't keep its shape at checksum). Just think about it!
 
 The truest of reasons for this strange key disorder pattern is, under the hood, that this was so built for in-browser memory access optimization, due to transform static string paths, the hard-coded `object.key` references. No matter how big the index its access times are equal for either path in one `Object`.
 
 Hash table indexing is employed for the optimization, memoizing shorter, static pointers to stored properties (browser links in memory addresses in applying data state to code blocks, at consumers).
 
-There's one thing about the `Object` that wants to get discovered and I haven't yet made the realization; whether dynamic string keys receive the same treatment, in variable bracket notation (at any code repetition, optimized or first-time). 
+There's one thing about the `Object` that wants to get discovered and I haven't yet made the realization; whether dynamic string keys receive the same treatment when a variable in bracket notation (… at any code repetition, optimized or first-time). 
 
 So here's example of a similar object built for both front-end and backend (it can facilitate traversing paths). It creates deep object paths based on characters in words, object paths or even DOM nodes (tagged with attribute). This class can be created both with Object or with Array Entries path. When order of elements is crucial for efficient DOM path access, for example when placing `reactive-custom-tags` in areas of template and attribute assignment. What is equal among both structs, Array or Object, is the tree structure. Both are versatile in use, though Array is a little more difficult to implement.
 
+```javascript trickaweek/index.html
+const TRICKS = {
+      stance: ["Nollie", "Switch", "Fakie", "To Fakie", "To Normal"],
+      slides: ["Boardslide", "Noseslide", "Tailslide", "Bluntslide", "Blunt", "Nosebluntslide", "Noseblunt", "Darkslide"],
+};
+```
 ```javascript jsonion/trieOfArrayUnique
 /*/////
   creating routing index pointers to handle 
-  keyword histogram queries more efficiently
+  keyword autocomplete queries more efficiently
  (keywords are disintegrated into per-char paths)
                                           */////
 class TrieOfArrayUnique extends Object {
@@ -62,10 +170,21 @@ class TrieOfArrayUnique extends Object {
   recurse (keys, vals, fn) {}
    ////    generalist class factory function
    ////    ... of `jsonion/trieOfArrayUnique`
+   ////    ... try TrieOfArrayUnique XML AST!
 }
 ```
 
-One interesting observation to make in above codeblock is that, when extending the Object class (`JSObjects.h` in Chromium), the new subclass can't use `super` to push input prop objects and configurations up into the Object superclass directly. Is this a little note to the fact then any of these props would likely use the built-in hash table capacity. Or not!
+One interesting observation to make in above codeblock is that, when extending the Object class (`JSObjects.h` in Chromium), the new subclass can't use `super` to push input prop objects and configurations up into the `Object` superclass directly. Is this a little note to assume whether then any of these props would likely use the built-in hash table capacity?
+
+> You should avoid calling any Object.prototype method directly from the instance, especially those that are not intended to be polymorphic (i.e. only its initial behavior makes sense and no descending object could override it in a meaningful way).
+>
+> -- <cite>[`Object` constructor at `developer.mozilla.org`][1]</cite>
+
+Very likely, because of the way of accessing properties in collections in JS syntax, the above citation explains that Object's properties are moved entirely out of the way for the one purpose of naming any custom paths.
+
+In terms of memory allocation this shows that getter and setter methods, applied to context of one `Object`, rely on hash table resolver's activity. In online documentation, however, has been denoted that `JSObject` maintains the hash table index only upon reaching a certain size in entries count.
+
+Before the next struct in example, what does this mean for the alphabet, is it too long already and each new entry requires hashing to run each level deeper?
 
 ```javascript
 class keywordTrie extends TrieOfArrayUnique {
@@ -74,6 +193,7 @@ class keywordTrie extends TrieOfArrayUnique {
   count = 0,
   words = str.split(this.rxSplit).forEach(str =>
           {
+      ////  code needs tweaking ("To Fakie")
             if (!str.length) return;
             else count++;
 
@@ -85,24 +205,23 @@ class keywordTrie extends TrieOfArrayUnique {
           return words;
   }
 
+    //
+   // the next method is suitable for strings,
+  //  but for DOM tree AST
+
   updateTrie (str, term, collection, idx) {
     this.recurse([...term], term, onLeafWordNode);
-
+      //// clone [...term] string to char array
     function onLeafWordNode (wordNode, term) {
-       ////  create new trie leaf node
-      return {
+      ////  create new trie leaf node
+     return {
+       term, n: 1,
+        ref: {[collection]: [{idx, n: 1}]}
 
-        term, n: 1,
-         ref: {[collection]: [{idx, n: 1}]}
-
-      };
-    }
+        ///  where's "To Fakie" now
+     }}
   }
 }
-
-const TRICKS = {
-      stance: ["Nollie", "Switch", "Fakie", "To Fakie", "To Normal"],
-};
 
 var keywordTries
  = { TRICKS: new keywordTrie(),
@@ -115,7 +234,7 @@ for (let [idx, str] of Object.entries(arr)   )
 
 ```
 
-Perhaps we can conclude that, in terms of memory allocation, there is a difference among internal subclass properties and methods, and the contents at hash table resolver's on this code syntax.
+If considering memory usage, coming from this type of objects, it's important to note that there is maintaining of a list of consumers, variables out there which currently reference to any given JSObjects subclass instance, which are stored in memory in reverse-reference, too (along the way one can learn that objects as they are invoked stay in memory until this list turns empty). This probably means that these `Trie` objects are freed up by cascading down the keyword tree (can you imagine that, from root to suffix, kind of like with `Solitaire`, the card game).
 
 ```javascript reactive.elementPrototype.js
 import {getPropPaths} from './reactive.props.js';
@@ -180,8 +299,6 @@ class reactiveElement extends HTMLElement {
 
 ```
 
-However, it does seem like there is maintaining of a list of consumers, variables out there which currently reference to any given JSObjects subclass instance, which are stored in memory in reverse-reference, too (along the way, one can learn that objects as they are invoked stay in memory until this list turns empty).
-
 ```javascript example-component
 ///  i.e. `state` is defined at a reactive hook
 for (let inArrRow of DB[collection]
@@ -215,8 +332,6 @@ if (this.props.userId !== userId
 ///   ... I attempt to create reactive tpl ctl
     }
 ```
-
-It so occurs that document nodes on inbound web traffic in browser are usually parsed using `JSON.parse` and are thus immediately invoked and stored in JSObject; the Object is soon to apply its indexing on named collections and offset the intended rigid schema before any code could intercept it to parse out its schema in array. Oh well, atleast for the limited reason of checksum validation per document node, it then really makes sense to use a schema, defined in-array (or otherwise one given `keys` order won't keep its shape at checksum). Just think about it!
 
 Anyway, when checking for numerous string keys on JSObjects at once (like using `object destructure syntax`)... Because surely key orders kept in memory don't equal across objects in transaction, the datasets and thereby applying schemas, the query for values in key-value pairs, even with all the hashing tables, I can't help notice it must be atleast somewhat less efficient than with the in-array case where these simply take place as deterministic indexes (and mapping data state to variables impossible via the more efficient array destructuring syntax). It's kind of like being on streak, yeah sure, like in Sonic Dash and Subway Surf!
 
@@ -259,6 +374,8 @@ I was trigger-happy to publish my code disposition in jsonion.com/#airmoth repos
 There I'm suggesting to maintain a per-collection database schema layer where DB entries, JSON document nodes preserve their key order in whole, as rooted in Array. Sure it would be nice to have a JSON global built-in object property just pile up schema key order data, right at the browser level!
 
 Differencea in implementation include usage of ReaderStream and inArrayType on HTTP requests, and of course sometimes a layer to mimick seamless use like with JSObjects. But hold on, perhaps its better to just use and make use of Facebook's GraphQL and its schema syntax, spicing it up with some additional gql schema parsing!
+
+This another case to consider, that GraphQL introduces writing `gql` statements on frontend, and because scripting modular schemas happens in string fragments the schema isn't lost. However, this approach will never be intended to provide a complete and ordered schema.
 
 Under terms of efficiency and cross-platform compatibility there are some other interesting applications we shall explore later on, specifically about a C++ codebase to use with microcontrollers. Linking some of the C++ code for WebAssembly can lead to code reuse among platforms. There JSON objects are parsed from string as Uint8Array buffers and require making distinct build routes for C++ and JavaScript+WebAssembly ports in one codebase. This daunting task has historic implications for the LeapGest whitepaper, at least!
 
