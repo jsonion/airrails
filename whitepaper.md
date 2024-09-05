@@ -35,6 +35,7 @@ Well so what, right? Were there static schema objects to allow for public checks
           =  Date.now().getSeconds();
 
          DB.Streaks
+          = bfr
           = inArrType(bfr, {invalidateCache});
 
          localStorage.setItem("streaks", 
