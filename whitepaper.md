@@ -17,10 +17,10 @@ Well so what, right? Were there static schema objects to allow for public checks
  DB.Streaks = (bfr)                   &&
               (bfr = JSON.parse(bfr)) && 
                       inArrType(bfr);
-   /////     becomes executable array
+    /////    becomes executable array
  
  switch (!!DB.Streaks) {
-  case  true:
+  case true:
    if (DB.Streaks.invalidateCache < Date.now()
                                  .getSeconds())
       { localStorage.removeItem("streaks"); 
@@ -28,19 +28,19 @@ Well so what, right? Were there static schema objects to allow for public checks
 /*/////
    in other case a collection need be fetched
                                           */////
-  case  false:
-   if   (bfr = await getStreaks())
-        {
-         let invalidateCache 
-          =  Date.now().getSeconds();
+  case false:
+   if  (bfr = await getStreaks())
+       {
+        let invalidateCache 
+         =  Date.now().getSeconds();
 
-         DB.Streaks
-          = bfr
-          = inArrType(bfr, {invalidateCache});
+        DB.Streaks
+         = bfr
+         = inArrType(bfr, {invalidateCache});
 
-         localStorage.setItem("streaks", 
-                 JSON.stringify( bfr ));
-        }
+        localStorage.setItem("streaks", 
+                JSON.stringify( bfr ));
+       }
   }
 
     //
@@ -63,7 +63,7 @@ Well so what, right? Were there static schema objects to allow for public checks
        auth: "/auth",
       users: "/users",
     streaks: "/streaks",
-    };    ///  service-specific API endpoints
+    };  ////   service-specific API endpoints
 
    const CFG = () => new Object({
       headers: {
@@ -110,7 +110,7 @@ const curUser = JSON.parse(`[{
                                  {"weekIdx":35},
                                  {"weekIdx":34} 
                                  }]
-}]`); /////  …  streaks aren't limited to sk8!
+}]`);  /////  …  streaks aren't limited to sk8!
 
 JSON.stringify(curUser);
 
