@@ -12,19 +12,19 @@ Well so what, right? Were there static schema objects to allow for public checks
    lil front-end database caching logic starter
                                           */////
 (bfr=window.localStorage
-  && window.localStorage.getItem("streaks"));
+ &&  window.localStorage.getItem("streaks"));
 
  DB.Streaks = (bfr)                   &&
               (bfr = JSON.parse(bfr)) && 
                       inArrType(bfr);
    /////     becomes executable array
  
- switch (DB.Streaks) {
+ switch (!!DB.Streaks) {
   case  true:
-   if   (DB.Streaks.invalidateCache < Date.now()
-                                   .getSeconds())
-        {localStorage.removeItem("streaks"); 
-         break}
+   if (DB.Streaks.invalidateCache < Date.now()
+                                 .getSeconds())
+      { localStorage.removeItem("streaks"); 
+        break }
 /*/////
    in other case a collection need be fetched
                                           */////
@@ -70,7 +70,7 @@ Well so what, right? Were there static schema objects to allow for public checks
         "Content-Type": "application/json"
       },
       mode: "cors",
-      cache: "no-cache", 
+      cache: "no-cache",   ////   thinking it
       redirect: "follow",
       referrerPolicy: "no-referrer",
    }),
@@ -207,20 +207,20 @@ class keywordTrie extends TrieOfArrayUnique {
           return words;
   }
 
-    //
-   // the next method is suitable for strings,
-  //  but for DOM tree AST
+    // the next method is suitable for strings,
+   //  but for DOM tree AST we need static index
+  //  (published `trieOfArrayUnique`
+  //     becomes `TrieOfArrayUnique`, reactive)
 
   updateTrie (str, term, collection, idx) {
     this.recurse([...term], term, onLeafWordNode);
       //// clone [...term] string to char array
     function onLeafWordNode (wordNode, term) {
-      ////  create new trie leaf node
      return {
+      //// create new trie leaf node
        term, n: 1,
         ref: {[collection]: [{idx, n: 1}]}
-
-        ///  where's "To Fakie" now
+      //// where's "To Fakie" now
      }}
   }
 }
@@ -241,7 +241,7 @@ If considering memory usage, coming from this type of objects, it's important to
 
 Anyway, when checking for numerous string keys on `JSObject` at once (like using `object destructure syntax`)... Because surely key orders kept in memory don't equal across objects in transaction, the datasets and thereby applying schemas, the query for values in key-value pairs, even with all the hashing tables, it must be atleast somewhat less efficient than when getting `slice` of one `Array`.
 
-In case of `Array` these take place inline in a sequence of cosequent indexes (and mapping data state to variables impossible via the more efficient array destructuring syntax). It's kind of like being on streak, yeah sure, like in Sonic Dash and Subway Surf!
+In case of `Array` these take place inline in a sequence of cosequent indexes, and mapping data state to variables made possible via the more efficient array destructuring syntax). It must be akin to being on streak, yeah sure, like in `Sonic Dash` and `Subway Surf`!
 
 Then the coding project to mitigate this, easy or difficult, it literally means that data after schema are supplied in bulks -- and perhaps this simply means a more talkative API with more access points, as these are routes where variables take stage as planned for proper usage and then structured for the various use-cases (perhaps with their own key-value store cache). Yes, and keyword index applied to resolve them. Hey, maybe a real chatbot can help fetch data the first time!
 
@@ -290,7 +290,6 @@ class reactiveElement extends HTMLElement {
   }
 
   // method's imported from `reactive.props.js` 
-  getPropPaths =
   getPropPaths;
 
   // browser API for `custom tag` elements
