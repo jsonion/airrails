@@ -5,34 +5,32 @@ _Hereby I am working on my `jsonion` framework, applying it on my side-project a
 
 Lets start by making a simple claim, that JS object notation is trivial to use when naming collections of paths and values as part of the coding experience. But! These objects aren't immutable in their structure and will encounter fluctuations in key order early on, ie. printed on next tick via console.log.
 
-```javascript trickaweek.com
-JSON.parse(`[{
-	userId: 1234, displayName: "blaz_skate", 
-	               streakData: [{ weekIdx: 36,
-	               								weekIdx: 35,
-	               								weekIdx: 34 }]
-}]`);   /////   streaks aren't limited to sk8!
-```
-
 Well so what, right? Were there static schema objects to allow for public checksum validation of document nodes, as received from one remote DB[collection], or found in local persistent storage, and at that with simplistic syntax that JS is known for? Well aren't web developers the chattery types!
 
-```json
+```javascript trickaweek.com
+JSON.parse(`[{
+  userId: 1234, displayName: "blaz_skate", 
+                 streakData: [{ weekIdx: 36,
+                                weekIdx: 35,
+                                weekIdx: 34 }]
+}]`);   /////   streaks aren't limited to sk8!
+
 JSON.stringify(collection.streakData);
 
-[{"displayName":"blaz_skate","streakData":[${...}],"userId":"1234"}]
+[{"displayName":"blaz_skate","streakData":["{...}"],"userId":"1234"}]
 
 // see key order changed for no obvious reason
 ```
 
 The truest of reasons for this strange key disorder pattern is, under the hood, that this was so built for in-browser memory access optimization, due to transform static string paths, the hard-coded `object.key` references. No matter how big the index its access times are equal for either path in one `Object`.
 
-Hash table indexing is employed for the optimization, which stores shorter, static pointers to stored properties (linking in memory addresses in applying data state to code blocks, at consumers).
+Hash table indexing is employed for the optimization, memoizing shorter, static pointers to stored properties (browser links in memory addresses in applying data state to code blocks, at consumers).
 
-There's one thing about the `Object` that wants to get discovered and I haven't yet made the realization; whether dynamic string keys receive the same treatment, in bracket notation, in executing code blocks, fresh or refreshed (at any code repetition, optimized or first-time). 
+There's one thing about the `Object` that wants to get discovered and I haven't yet made the realization; whether dynamic string keys receive the same treatment, in variable bracket notation (at any code repetition, optimized or first-time). 
 
-So here's example of a similar object on front-end, it creates deep object paths based on characters in words (well atleast there's not much use for flat Arrays or Objects unless there's an index API):
+So here's example of a similar object built for both front-end and backend (it can facilitate traversing paths). It creates deep object paths based on characters in words, object paths or even DOM nodes (tagged with attribute). This class can be created both with Object or with Array Entries path. When order of elements is crucial for efficient DOM path access, for example when placing `reactive-custom-tags` in areas of template and attribute assignment. What is equal among both structs, Array or Object, is the tree structure. Both are versatile in use, though Array is a little more difficult to implement.
 
-```javascript
+```javascript jsonion/trieOfArrayUnique
 /*/////
   creating routing index pointers to handle 
   keyword histogram queries more efficiently
@@ -42,26 +40,26 @@ class TrieOfArrayUnique extends Object {
       #trie = new Object();
       #recurse; #terminated; #terminator;
   //////////////////////////////////////
-	constructor (cfg={...}) {
-				////// cost of ensuring against override
-     		delete cfg.q;
+  constructor (cfg={...}) {
+        ////// cost of ensuring against override
+        delete cfg.q;
         delete cfg.add;
         delete cfg.get;
         delete cfg.remove;
         delete cfg.formatInputs;
         delete cfg.recurse;
 
-				 super(cfg);
+         super(cfg);
         ////// this property assigning fails
 
-				Object.assign(this, cfg);
-				////// this works, though
-	}
+        Object.assign(this, cfg);
+        ////// this works, though
+  }
 
   formatInputs (keys,
-	              vals=null,
-	                fn=null) {}
-	recurse (keys, vals, fn) {}
+                vals=null,
+                  fn=null) {}
+  recurse (keys, vals, fn) {}
    ////    generalist class factory function
    ////    ... of `jsonion/trieOfArrayUnique`
 }
@@ -71,7 +69,7 @@ One interesting observation to make in above codeblock is that, when extending t
 
 ```javascript
 class keywordTrie extends TrieOfArrayUnique {
-	parse (str, collection, idx=false) {
+  parse (str, collection, idx=false) {
    var
   count = 0,
   words = str.split(this.rxSplit).forEach(str =>
@@ -98,12 +96,12 @@ class keywordTrie extends TrieOfArrayUnique {
          ref: {[collection]: [{idx, n: 1}]}
 
       };
-  	}
+    }
   }
 }
 
 const TRICKS = {
- 	 		stance: ["Nollie", "Switch", "Fakie", "To Fakie", "To Normal"],
+      stance: ["Nollie", "Switch", "Fakie", "To Fakie", "To Normal"],
 };
 
 var keywordTries
@@ -112,7 +110,7 @@ var keywordTries
 
 for (let [key, arr] of Object.entries(TRICKS)) {
 for (let [idx, str] of Object.entries(arr)   )
-		 keywordTries.TRICKS.parse(str, key, idx);
+     keywordTries.TRICKS.parse(str, key, idx);
 }
 
 ```
@@ -139,9 +137,9 @@ class reactiveElement extends HTMLElement {
                     props to render AST    /
                    `sortAdd`,`onion-key` */
         
-	static AST;  props;  state; 
-	       AST = reactiveElement.AST
-	                            .get(this);
+  static AST;  props;  state; 
+         AST = reactiveElement.AST
+                              .get(this);
   constructor (props) {
   ///  … super(props) ... subclass call
 
@@ -163,11 +161,11 @@ class reactiveElement extends HTMLElement {
   var  omitProps = new Array();
   }
 
- 	// method's imported from `reactive.props.js` 
-	getPropPaths =
+  // method's imported from `reactive.props.js` 
+  getPropPaths =
   getPropPaths;
 
-	// browser API for `custom tag` elements
+  // browser API for `custom tag` elements
      connectedCallback() {}
   disconnectedCallback() {}
        adoptedCallback() {}
@@ -175,8 +173,8 @@ class reactiveElement extends HTMLElement {
 /*/////// or scripted in React legacy code
   static componentWillMount (container) {}
 
-	static componentWillReceiveProps (instance,
-		                                props) {}
+  static componentWillReceiveProps (instance,
+                                    props) {}
  *///////
 }
 
@@ -187,17 +185,17 @@ However, it does seem like there is maintaining of a list of consumers, variable
 ```javascript example-component
 ///  i.e. `state` is defined at a reactive hook
 for (let inArrRow of DB[collection]
-	                .sort(sortingKey)
-	                .slice(page_idx * perPage, 
-	                	     page_idx * perPage
-	                	              + perPage))
+                  .sort(sortingKey)
+                  .slice(page_idx * perPage, 
+                         page_idx * perPage
+                                  + perPage))
     {
 let [userId, displayName, streakData] 
  =   inArrRow.slice(1)
 ///  inArrRow.0 is a pointer object (next lines)
 ///  inArrRow.get("userId", 
-///	 	             "displayName",
-///	 	               "streakData");
+///                "displayName",
+///                  "streakData");
 
 
 ///  the following code block is from automation
@@ -205,17 +203,17 @@ let  onionKey = String.fromCharCode(
 this.onionKey ++ );
 
 let [key] = this.AST.find(element => 
-	                        element.getAttribute(
-	                     	          "onion-key")
-	                          ===    onionKey);
+                          element.getAttribute(
+                                  "onion-key")
+                            ===    onionKey);
 
 if (this.props.userId !== userId
 ||  this.displaythis.setState({   ///////////////////////////////////////////////////////
-	user
+  user
 })
 ///  this happens on `componentReceivedProps`
 ///   ... I attempt to create reactive tpl ctl
-		}
+    }
 ```
 
 It so occurs that document nodes on inbound web traffic in browser are usually parsed using `JSON.parse` and are thus immediately invoked and stored in JSObject; the Object is soon to apply its indexing on named collections and offset the intended rigid schema before any code could intercept it to parse out its schema in array. Oh well, atleast for the limited reason of checksum validation per document node, it then really makes sense to use a schema, defined in-array (or otherwise one given `keys` order won't keep its shape at checksum). Just think about it!
@@ -226,7 +224,7 @@ Then the coding project to mitigate this, easy or difficult, it literally means 
 
 Surely, code sprints in mindfulness is required to get through and schematize these in-array sequences, ready to expect query use-cases which require specific variables. Well is this the type of freedom one intends, to plan quality coded applications?!
 
-Another point to practice internals, with outcome similar to the above, it is the potential implication within the scope of Chromium's V8 engine and its `hidden classes`, however minor in improving actual efficiency. There, the in-memory compiled JS code and its just-in-time cache are streamlined, thriving on equal order of appearance for variables as they are evoked. This holds true for any actual combination of variables to receive a value, as instead of not holding a value, besides any other database objects, destructured or  accessed in depth by some indexing key. 
+Another point to practice internals, with outcome similar to the above, it is the potential implication within the scope of Chromium's V8 engine and its `hidden classes`, however minor in improving actual efficiency. There, the in-memory compiled JS code and its just-in-time cache are streamlined, thriving on equal order of appearance for variables as they are evoked. This holds true for any actual combination of variables to receive a value, as instead of not holding a value, besides any other database objects, destructured or  accessed in depth by some indexing key. 
 
 With V8, like molds, when inputs occur in various combinations for each new combination of invoked variables, more new `hidden classes` are invoked in turn. Then, instead of assigning one or two variables more per each one execution of a given consumer method, keep in mind that these data objects already exist in memory after `JSON.parse`. The current cost these methods assert is then to create a new `hidden class` and this does indeed imply a processing cost slightly bigger (perhaps not only for the time-keepers). Array destructuring syntax in JS could help with that, lining up values in streak after any designate validation requirements,
 such as in the case of inArrayTypes ...
