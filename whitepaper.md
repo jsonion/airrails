@@ -105,7 +105,7 @@ Well so what, right? Were there static schema objects to allow for public checks
 
 const curUser = JSON.parse(`[{
 "userId": "1234", "displayName": "blaz_skate", 
-                   'streakData": [
+                   "streakData": [
                                  {"weekIdx":36},
                                  {"weekIdx":35},
                                  {"weekIdx":34} 
