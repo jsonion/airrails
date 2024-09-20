@@ -49,7 +49,7 @@ Well so what, right? Were there static schema objects to allow for public checks
 
   async function getStreaks () {
     let res = await fetchAPI("streaks", "/now");
-    return await res.json();
+    return res;
   }
 
   function fetchAPI (route, urlMix,
